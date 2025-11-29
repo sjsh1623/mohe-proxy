@@ -2,6 +2,12 @@
     auto_https off
 }
 
+# 80/443 port - default to Spring API
+:80 {
+    reverse_proxy spring:8000
+}
+
+# Port-specific routing
 :8080 {
     reverse_proxy spring:8000
 }
