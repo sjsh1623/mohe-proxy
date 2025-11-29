@@ -2,12 +2,20 @@
     auto_https off
 }
 
-# 80/443 port - default to Spring API
+# Main HTTP entry point with path-based routing
 :80 {
-    reverse_proxy spring:8000
+    # API backend
+    handle /api/* {
+        reverse_proxy spring:8000
+    }
+
+    # Web application (default)
+    handle {
+        reverse_proxy react:3000
+    }
 }
 
-# Port-specific routing
+# Direct port access (for development/testing)
 :8080 {
     reverse_proxy spring:8000
 }
