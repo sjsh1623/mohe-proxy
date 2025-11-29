@@ -1,0 +1,11 @@
+{
+    auto_https off
+}
+
+:8080 {
+    reverse_proxy spring:8000
+}
+
+:3000 {
+    reverse_proxy react:3000
+}

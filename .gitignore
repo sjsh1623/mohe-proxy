@@ -1,0 +1,6 @@
+# Caddy data
+data/
+config/
+
+# System files
+.DS_Store
