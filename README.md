@@ -5,16 +5,29 @@ Caddy-based reverse proxy for Spring and React services.
 ## Architecture
 
 ```
-User → Caddy (80/443/8080/3000) → Spring (spring:8000)
-                                 → React (react:3000)
+User → Caddy (80/443/8080/3000)
+         │
+         ├─ /api/*    → Spring (spring:8000)
+         ├─ /*        → React (react:3000)
+         ├─ :8080     → Spring (direct)
+         └─ :3000     → React (direct)
 ```
+
+## Routing Rules
+
+### Path-based Routing (Port 80)
+- **API Backend**: `http://your-ip/api/*` → Spring Backend
+- **Web App**: `http://your-ip/*` → React Frontend
+
+### Direct Port Access (Development)
+- **Spring**: `http://your-ip:8080` → Spring Backend
+- **React**: `http://your-ip:3000` → React Frontend
 
 ## Configuration
 
-- **Spring**: Port 8080 → spring:8000
-- **React**: Port 3000 → react:3000
-- **SSL**: Let's Encrypt auto-renewal (when enabled)
+- **SSL**: Let's Encrypt auto-renewal (disabled by default, set `auto_https on`)
 - **Volumes**: /data, /config for persistence
+- **Network**: proxy_network (bridge)
 
 ## Usage
 
