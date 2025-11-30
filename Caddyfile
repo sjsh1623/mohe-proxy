@@ -1,9 +1,10 @@
 {
-    auto_https off
+    # Enable automatic HTTPS with self-signed certificates
+    local_certs
 }
 
-# Main HTTP entry point with path-based routing
-:80 {
+# Main entry point - handles both HTTP and HTTPS
+:80, :443 {
     # API backend
     handle /api/* {
         reverse_proxy spring:8080

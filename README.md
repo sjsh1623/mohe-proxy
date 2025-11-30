@@ -11,21 +11,55 @@ User → Caddy (80/443)
          └─ /*        → React (mohe-react-dev:3000)
 ```
 
+## Access URLs
+
+### Local Network Access
+- **HTTP**: `http://192.168.219.134/` → React Frontend
+- **HTTPS**: `https://192.168.219.134/` → React Frontend (self-signed cert)
+- **API**: `http://192.168.219.134/api/*` → Spring Backend
+
+### External Access (Requires Port Forwarding)
+- **HTTP**: `http://211.241.95.238/` → React Frontend
+- **HTTPS**: `https://211.241.95.238/` → React Frontend (self-signed cert)
+- **API**: `http://211.241.95.238/api/*` → Spring Backend
+
+### Direct Container Access (Testing Only)
+- **Spring**: `http://192.168.219.134:8000` → Spring Backend (container port 8080)
+- **React**: `http://192.168.219.134:3000` → React Frontend (container port 3000)
+
 ## Routing Rules
 
-### Path-based Routing (Port 80)
-- **API Backend**: `http://your-ip/api/*` → Spring Backend (spring:8080)
-- **Web App**: `http://your-ip/*` → React Frontend (mohe-react-dev:3000)
-
-### Direct Port Access (For Testing)
-- **Spring**: `http://your-ip:8000` → Spring Backend (container port 8080)
-- **React**: `http://your-ip:3000` → React Frontend (container port 3000)
+### Path-based Routing
+- **API Backend**: `/api/*` → Spring Backend (spring:8080)
+- **Web App**: `/*` → React Frontend (mohe-react-dev:3000)
+- **Ports**: 80 (HTTP), 443 (HTTPS)
 
 ## Configuration
 
-- **SSL**: Let's Encrypt auto-renewal (disabled by default, set `auto_https on`)
+### SSL/HTTPS
+- **Self-Signed Certificate**: Enabled by default with `local_certs`
+- **Certificate Location**: `/data/caddy/pki/authorities/local/`
+- **Browser Warning**: You'll see a security warning due to self-signed cert
+  - Click "Advanced" → "Proceed to site" to access
+
+### Network Setup
+- **Local Network**: 192.168.219.0/24
+- **Local IP**: 192.168.219.134
+- **External IP**: 211.241.95.238
+- **Proxy Network**: proxy_network (bridge)
 - **Volumes**: /data, /config for persistence
-- **Network**: proxy_network (bridge)
+
+### Port Forwarding (For External Access)
+
+To access from outside your local network (211.241.95.238), configure port forwarding on your router:
+
+1. **Router Settings** → Port Forwarding
+2. Add the following rules:
+   - **HTTP**: External Port 80 → Internal IP 192.168.219.134:80
+   - **HTTPS**: External Port 443 → Internal IP 192.168.219.134:443
+3. Save and restart router
+
+Without port forwarding, only local network access (192.168.219.x) will work.
 
 ## Usage
 
