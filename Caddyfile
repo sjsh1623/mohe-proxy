@@ -6,20 +6,11 @@
 :80 {
     # API backend
     handle /api/* {
-        reverse_proxy spring:8000
+        reverse_proxy spring:8080
     }
 
     # Web application (default)
     handle {
-        reverse_proxy react:3000
+        reverse_proxy mohe-react-dev:3000
     }
-}
-
-# Direct port access (for development/testing)
-:8080 {
-    reverse_proxy spring:8000
-}
-
-:3000 {
-    reverse_proxy react:3000
 }
