@@ -14,9 +14,9 @@ User → Caddy (80/443)
 ## Access URLs
 
 ### Local Network Access
-- **HTTP**: `http://192.168.219.134/` → React Frontend
-- **HTTPS**: `https://192.168.219.134/` → React Frontend (self-signed cert)
-- **API**: `http://192.168.219.134/api/*` → Spring Backend
+- **HTTP**: `http://192.168.219.100/` → React Frontend
+- **HTTPS**: `https://192.168.219.100/` → React Frontend (self-signed cert)
+- **API**: `http://192.168.219.100/api/*` → Spring Backend
 
 ### External Access (Requires Port Forwarding)
 - **HTTP**: `http://211.241.95.238/` → React Frontend
@@ -24,8 +24,8 @@ User → Caddy (80/443)
 - **API**: `http://211.241.95.238/api/*` → Spring Backend
 
 ### Direct Container Access (Testing Only)
-- **Spring**: `http://192.168.219.134:8000` → Spring Backend (container port 8080)
-- **React**: `http://192.168.219.134:3000` → React Frontend (container port 3000)
+- **Spring**: `http://192.168.219.100:8000` → Spring Backend (container port 8080)
+- **React**: `http://192.168.219.100:3000` → React Frontend (container port 3000)
 
 ## Routing Rules
 
@@ -44,8 +44,9 @@ User → Caddy (80/443)
 
 ### Network Setup
 - **Local Network**: 192.168.219.0/24
-- **Local IP**: 192.168.219.134
+- **Local IP**: 192.168.219.100 (current Mac IP)
 - **External IP**: 211.241.95.238
+- **Gateway**: 192.168.219.1
 - **Proxy Network**: proxy_network (bridge)
 - **Volumes**: /data, /config for persistence
 
@@ -55,9 +56,14 @@ To access from outside your local network (211.241.95.238), configure port forwa
 
 1. **Router Settings** → Port Forwarding
 2. Add the following rules:
-   - **HTTP**: External Port 80 → Internal IP 192.168.219.134:80
-   - **HTTPS**: External Port 443 → Internal IP 192.168.219.134:443
+   - **HTTP**: External Port 80 → Internal IP **192.168.219.100**:80
+   - **HTTPS**: External Port 443 → Internal IP **192.168.219.100**:443
 3. Save and restart router
+
+**IMPORTANT**: Make sure to use the correct internal IP (192.168.219.100). You can verify your current IP with:
+```bash
+ifconfig en0 | grep "inet "
+```
 
 Without port forwarding, only local network access (192.168.219.x) will work.
 
