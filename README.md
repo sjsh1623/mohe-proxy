@@ -18,10 +18,10 @@ User → Caddy (80/443)
 - **HTTPS**: `https://192.168.219.100/` → React Frontend (self-signed cert)
 - **API**: `http://192.168.219.100/api/*` → Spring Backend
 
-### External Access (Requires Port Forwarding)
-- **HTTP**: `http://211.241.95.238/` → React Frontend
-- **HTTPS**: `https://211.241.95.238/` → React Frontend (self-signed cert)
-- **API**: `http://211.241.95.238/api/*` → Spring Backend
+### External Access (Port Forwarding Configured)
+- **HTTP**: `http://182.210.216.60/` → React Frontend
+- **HTTPS**: `https://182.210.216.60/` → React Frontend (self-signed cert)
+- **API**: `http://182.210.216.60/api/*` → Spring Backend
 
 ### Direct Container Access (Testing Only)
 - **Spring**: `http://192.168.219.100:8000` → Spring Backend (container port 8080)
@@ -45,27 +45,32 @@ User → Caddy (80/443)
 ### Network Setup
 - **Local Network**: 192.168.219.0/24
 - **Local IP**: 192.168.219.100 (current Mac IP)
-- **External IP**: 211.241.95.238
+- **External IP**: 182.210.216.60 (LG U+ / Xpeed)
 - **Gateway**: 192.168.219.1
+- **ISP**: LG U+ (Xpeed)
 - **Proxy Network**: proxy_network (bridge)
 - **Volumes**: /data, /config for persistence
 
-### Port Forwarding (For External Access)
-
-To access from outside your local network (211.241.95.238), configure port forwarding on your router:
-
-1. **Router Settings** → Port Forwarding
-2. Add the following rules:
-   - **HTTP**: External Port 80 → Internal IP **192.168.219.100**:80
-   - **HTTPS**: External Port 443 → Internal IP **192.168.219.100**:443
-3. Save and restart router
-
-**IMPORTANT**: Make sure to use the correct internal IP (192.168.219.100). You can verify your current IP with:
+**Note**: External IP may change if your ISP uses dynamic IP. Check current IP with:
 ```bash
-ifconfig en0 | grep "inet "
+curl ifconfig.me
 ```
 
-Without port forwarding, only local network access (192.168.219.x) will work.
+### Port Forwarding (Configured ✅)
+
+Port forwarding has been configured on the router:
+
+**Current Configuration:**
+- **HTTP**: External Port 80 → Internal IP 192.168.219.100:80
+- **HTTPS**: External Port 443 → Internal IP 192.168.219.100:443
+
+**Router**: 192.168.219.1
+**External Access**: http://182.210.216.60/ (working ✅)
+
+If external IP changes or access stops working:
+1. Check current external IP: `curl ifconfig.me`
+2. Verify local IP hasn't changed: `ifconfig en0 | grep "inet "`
+3. Update port forwarding if local IP changed
 
 ## Usage
 
