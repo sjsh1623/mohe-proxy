@@ -1,17 +1,47 @@
 {
-    # Enable automatic HTTPS with self-signed certificates
-    local_certs
+    # Email for Let's Encrypt notifications
+    email hello@mohe.app
 }
 
-# Main entry point - handles both HTTP and HTTPS
+# Block direct IP access
 :80, :443 {
-    # API backend
+    respond "Access denied - please use domain name" 403
+}
+
+# Handle mohe.today domain with HTTPS
+mohe.today {
+    # Automatic HTTPS with Let's Encrypt
+    # Caddy automatically handles certificate renewal
+
+    # API backend - proxy to Spring Boot
     handle /api/* {
         reverse_proxy spring:8080
     }
 
-    # Web application (default)
+    # Image processing server - proxy to Node.js image processor
+    handle /image/* {
+        reverse_proxy moheimageprocessor-app-1:5200
+    }
+
+    # Web application - proxy to React dev server
     handle {
         reverse_proxy mohe-react-dev:3000
     }
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Enable gzip compression
+    encode gzip
 }
+
+# HTTP to HTTPS redirect is automatic with Caddy
