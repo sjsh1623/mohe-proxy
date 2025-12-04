@@ -9,6 +9,11 @@
 
 # Handle mohe.today domain with HTTPS
 mohe.today {
+	# Health check endpoint
+	handle /health {
+		respond "OK" 200
+	}
+
 	# API backend - proxy to Spring Boot
 	handle /api/* {
 		reverse_proxy spring:8080

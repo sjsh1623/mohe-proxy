@@ -16,6 +16,7 @@ This is a Caddy-based reverse proxy server that routes traffic to Spring Boot ba
 ```
 Internet → Caddy (proxy-caddy container)
               │
+              ├─ mohe.today/health   → Health check (returns "OK")
               ├─ mohe.today/api/*    → spring:8080 (external network)
               ├─ mohe.today/image/*  → moheimageprocessor-app-1:5200 (external network)
               └─ mohe.today/*        → mohe-react-dev:3000 (external network)
@@ -86,8 +87,12 @@ docker exec proxy-caddy caddy reload --config /etc/caddy/Caddyfile
 - **Global block**: Email for Let's Encrypt notifications
 - **IP blocking block**: Blocks direct IP access (responds with 403)
 - **Domain block (mohe.today)**: Main routing configuration
+  - `handle /health`: Health check endpoint (returns "OK")
   - `handle /api/*`: Routes to Spring Boot backend
   - `handle /image/*`: Routes to image processor with CORS headers
+    - Supports full filenames (URL-encoded): `/image/10000_파스토보이_월계점_1.jpg`
+    - Supports ID-only lookup: `/image/10000` (finds matching file automatically)
+    - Supports resizing: `/image/10000/400/300` (width x height)
   - `handle`: Default route to React frontend
   - Security headers and compression applied to all responses
 

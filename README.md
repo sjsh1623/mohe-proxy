@@ -30,9 +30,37 @@ User → Caddy (80/443)
 ## Routing Rules
 
 ### Path-based Routing
+- **Health Check**: `/health` → Returns "OK" (proxy health check)
 - **API Backend**: `/api/*` → Spring Backend (spring:8080)
+- **Image Processing**: `/image/*` → Image Processor (moheimageprocessor-app-1:5200)
 - **Web App**: `/*` → React Frontend (mohe-react-dev:3000)
 - **Ports**: 80 (HTTP), 443 (HTTPS)
+
+### Image Access
+Images are served through the image processor service at `/image/` endpoint.
+
+**URL Format:**
+```
+https://mohe.today/image/{filename}
+```
+
+**Examples:**
+```bash
+# Access image by full filename (URL-encoded for Korean characters)
+https://mohe.today/image/10000_%ED%8C%8C%EC%8A%A4%ED%86%A0%EB%B3%B4%EC%9D%B4_%EC%9B%94%EA%B3%84%EC%A0%90_1.jpg
+
+# Access image by ID only (without extension) - automatically finds matching file
+https://mohe.today/image/10000
+
+# Access resized image (width x height)
+https://mohe.today/image/10000/400/300
+```
+
+**Important Notes:**
+- Image filenames with Korean characters must be URL-encoded
+- Images are served with CORS headers enabled
+- Images are cached with `Cache-Control: public, max-age=31536000, immutable`
+- Supported formats: jpg, jpeg, png, gif, webp, svg, ico
 
 ## Configuration
 
