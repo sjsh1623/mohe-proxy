@@ -1,13 +1,20 @@
 services:
   caddy:
-    image: caddy:2-alpine
+    build: .
+    image: caddy-cloudflare:local
     container_name: proxy-caddy
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      # Withy maintenance flag dir. Presence of withy-maintenance.json inside
+      # makes Caddy short-circuit /withy/api/health to a static 점검 response
+      # (see tossa/scripts/withy-maintenance.sh). Read-only — Caddy never writes.
+      - ./maintenance:/srv/maintenance:ro
       - caddy_data:/data
       - caddy_config:/config
     networks:
