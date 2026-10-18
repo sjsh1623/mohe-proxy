@@ -56,51 +56,6 @@ mohe.today {
 		}
 	}
 
-	# Apple App Site Association — Universal Link manifest for Routinee.
-	# Apple's well-known fetcher demands the exact path
-	# /.well-known/apple-app-site-association (no extension, no redirect,
-	# Content-Type: application/json). Served inline so a missing static
-	# file can't silently break Universal Link verification on TestFlight
-	# devices. App IDs format: <TeamID>.<BundleID>. /routinee/share/r/*
-	# captures only invite-token URLs so marketing/onboarding pages stay
-	# in Safari.
-	@aasa path /.well-known/apple-app-site-association
-	handle @aasa {
-		header Content-Type application/json
-		respond `{"applinks":{"details":[{"appIDs":["B7JXA8GGC8.today.mohe.habittracker"],"components":[{"/":"/routinee/share/r/*","comment":"routine share invites"}]}]}}` 200
-	}
-
-	# Routinee — separate Spring + nginx pair, mounted under /routinee.
-	# Containers stay named ht-* (legacy from the HabitTracker codename, no
-	# need to rename runtime infra just because the public URL changed).
-	# /routinee/api/* is stripped before reaching ht-spring so the
-	# controller matchers stay free of the public prefix; /routinee/* keeps
-	# the prefix so the SPA's hashed assets at /routinee/assets/... resolve
-	# in nginx (built with Vite `base: '/routinee/'`, see web/vite.config.ts).
-	#
-	# /routinee/share/r/* is routed to ht-spring BEFORE the general
-	# /routinee/* SPA route so the share-landing controller can serve a
-	# server-rendered HTML with og:title/og:image (KakaoTalk, AirDrop, and
-	# other share-sheet previews read meta tags before any JS runs). The
-	# landing HTML ends with a redirect into the SPA route.
-	#
-	# Legacy /ht/* paths 301 to /routinee/* so old TestFlight builds and
-	# bookmarked links keep working through one App Store update cycle.
-	handle_path /routinee/api/* {
-		reverse_proxy ht-spring:8080
-	}
-	# Path preserved (handle, not handle_path) so the Spring controller
-	# can match @GetMapping("/routinee/share/r/{token}") directly — root
-	# /{token} would collide with other one-segment paths in the service.
-	handle /routinee/share/r/* {
-		reverse_proxy ht-spring:8080
-	}
-	@routinee_root path /routinee
-	redir @routinee_root /routinee/ permanent
-	handle /routinee/* {
-		reverse_proxy ht-web:80
-	}
-
 	# Withy SPA — Vite is built with `base: '/withy/'` and React Router
 	# with `basename="/withy"`, so URLs the user sees stay path-prefixed.
 	# `handle_path` strips /withy before proxying to withy-web's nginx
@@ -143,32 +98,6 @@ mohe.today {
 	}
 	handle_path /mohe/* {
 		reverse_proxy mohe-react-app:80
-	}
-
-	# todly — React PWA (apps/web) + Spring API (apps/api), deployed under
-	# /todly. The web bundle is built with Vite base '/todly/' and React
-	# Router basename '/todly', so asset/router URLs stay prefixed. The API
-	# and WebSocket routes strip only the leading /todly segment (controllers
-	# live at /api/v1/*, SockJS handshake at /ws) before forwarding to
-	# todly-api; the SPA route uses handle_path so /todly/assets/... resolve
-	# from todly-web's nginx root. These come before the SPA handler so
-	# /todly/api and /todly/ws win over the catch-all /todly/*.
-	handle /todly/api/* {
-		uri strip_prefix /todly
-		reverse_proxy todly-api:8080
-	}
-	handle /todly/ws* {
-		uri strip_prefix /todly
-		reverse_proxy todly-api:8080
-	}
-	@todly_root path /todly
-	redir @todly_root /todly/ permanent
-	handle_path /todly/* {
-		reverse_proxy todly-web:80
-
-		header *.html Cache-Control "no-cache, no-store, must-revalidate"
-		header *.js   Cache-Control "public, max-age=31536000, immutable"
-		header *.css  Cache-Control "public, max-age=31536000, immutable"
 	}
 
 	# API backend - proxy to Spring Boot
@@ -252,8 +181,8 @@ mohe.today {
 	}
 
 	# Apex catch-all → Andrew Studio landing (mohe.today/). Tiny static
-	# nginx container that serves a single index.html with two product
-	# cards (Withy + Routinee). Unknown paths under apex return 404 from
+	# nginx container that serves a single index.html with a product
+	# card (Withy). Unknown paths under apex return 404 from
 	# the studio nginx (per its own location / { return 404; }), so a
 	# typo'd URL surfaces as a clean 404 instead of getting silently
 	# served the studio page.
